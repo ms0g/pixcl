@@ -24,8 +24,7 @@ typedef struct Args {
 } Args;
 
 static Args parseArgs(int argc, char** argv) {
-    static const char* usage =
-            "OVERVIEW: A fast, cross-platform command-line tool for real-time image processing using OpenCL acceleration.\n\n"
+    static const char* usage = "OVERVIEW: An OpenCL-based image processing tool\n\n"
             "USAGE: pixcl [options] <image file>\n\n"
             "OPTIONS:\n"
             "  -e, --effect          Effect to be applied[gb/gs/sep]\n"
@@ -76,6 +75,8 @@ static Args parseArgs(int argc, char** argv) {
 int main(int argc, char** argv) {
     // Parse Arguments
     const Args args = parseArgs(argc, argv);
+
+    if (args.image == nullptr) return 1;
 
     CLPipeline pipeline;
     Image in{}, out{};

@@ -21,21 +21,18 @@ Image::~Image() {
     mRaw = nullptr;
 }
 
-bool Image::load(const char* name) {
+void Image::load(const char* name) {
     mRaw = stbi_load(name, &mWidth, &mHeight, &mChannels, 0);
 
     if (mRaw == nullptr) {
-        std::cerr << "Error: File Not Found: " << name << std::endl;
-        return false;
+        throw std::runtime_error("Error: Failed to load image.");
     }
 
     mSize = mWidth * mHeight * mChannels;
     mAllocType = AllocationType::STB_ALLOCATED;
-
-    return true;
 }
 
-bool Image::create(int width, int height, int channels, ImageFormat format) {
+void Image::create(const int width, const int height, const int channels, const ImageFormat format) {
     mWidth = width;
     mHeight = height;
     mChannels = channels;
@@ -43,11 +40,9 @@ bool Image::create(int width, int height, int channels, ImageFormat format) {
     mAllocType = AllocationType::CUSTOM_ALLOCATED;
     mSize = mWidth * mHeight * mChannels;
     mRaw = new uint8_t[mSize];
-
-    return true;
 }
 
-void Image::write(const char* name, int quality) {
+void Image::write(const char* name, const int quality) const {
     switch (mFormat) {
         case ImageFormat::JPG:
             stbi_write_jpg(name, mWidth, mHeight, mChannels, mRaw, quality);
@@ -63,7 +58,7 @@ void Image::write(const char* name, int quality) {
             break;
         case ImageFormat::RAW: {
             std::ofstream outfile(name, std::ios::binary);
-            outfile.write(reinterpret_cast<const char*>(mRaw), mSize);
+            outfile.write(reinterpret_cast<const char*>(mRaw), static_cast<long>( mSize));
             outfile.close();
             break;
         }

@@ -28,19 +28,19 @@ public:
 
     [[nodiscard]] uint8_t* raw() const { return mRaw; }
 
-    bool load(const char* name);
+    void load(const char* name);
 
-    bool create(int width, int height, int channels, ImageFormat format);
+    void create(int width, int height, int channels, ImageFormat format);
 
-    void write(const char* name, int quality = 100);
+    void write(const char* name, int quality = 100) const;
 
 private:
-    int mWidth;
-    int mHeight;
-    int mChannels;
-    size_t mSize;
-    ImageFormat mFormat;
-    AllocationType mAllocType;
+    int mWidth{};
+    int mHeight{};
+    int mChannels{};
+    size_t mSize{};
+    ImageFormat mFormat{};
+    AllocationType mAllocType{};
     uint8_t* mRaw{nullptr};
 };
 

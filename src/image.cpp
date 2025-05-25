@@ -6,6 +6,18 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
+ImageFormat img::getFormat(const char* name) {
+    return !std::strcmp(name, "jpg") || !std::strcmp(name, "jpeg")
+               ? ImageFormat::JPG
+               : !std::strcmp(name, "png")
+                     ? ImageFormat::PNG
+                     : !std::strcmp(name, "bmp")
+                           ? ImageFormat::BMP
+                           : !std::strcmp(name, "tga")
+                                 ? ImageFormat::TGA
+                                 : ImageFormat::RAW;
+}
+
 Image::~Image() {
     if (mRaw == nullptr) return;
 
@@ -58,7 +70,7 @@ void Image::write(const char* name, const int quality) const {
             break;
         case ImageFormat::RAW: {
             std::ofstream outfile(name, std::ios::binary);
-            outfile.write(reinterpret_cast<const char*>(mRaw), static_cast<long>( mSize));
+            outfile.write(reinterpret_cast<const char*>(mRaw), static_cast<long>(mSize));
             outfile.close();
             break;
         }

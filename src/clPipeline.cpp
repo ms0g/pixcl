@@ -106,6 +106,14 @@ void CLPipeline::createKernel(const char* kernelName) {
     kernel = clCreateKernel(program, kernelName, &err);
 }
 
+void CLPipeline::setImageProperties(const int width, const int height, const int channels) {
+    this->width = width;
+    this->height = height;
+    this->channels = channels;
+
+    size = width * height * channels;
+}
+
 void CLPipeline::printProfilingInfo() const {
     // Get profiling information
     cl_ulong start, end;
@@ -126,8 +134,7 @@ std::string CLPipeline::loadKernelSource(const char* filename) {
     std::ifstream file(filename);
 
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open kernel source file." << std::endl;
-        return {};
+        throw std::runtime_error("Error: Could not open kernel source file.");
     }
 
     file.seekg(0, std::ios::end);

@@ -37,13 +37,7 @@ public:
     template<typename... Args>
     void setKernelArgs(Args&... args);
 
-    void setImageProperties(const int width, const int height, const int channels) {
-        this->width = width;
-        this->height = height;
-        this->channels = channels;
-
-        size = width * height * channels;
-    }
+    void setImageProperties(int width, int height, int channels);
 
     void printProfilingInfo() const;
 
@@ -87,6 +81,5 @@ void CLPipeline::setKernelArgs(Args&... args) {
 
     (applyArg(args), ...);
 }
-
 
 #endif //CLPIPELINE_H

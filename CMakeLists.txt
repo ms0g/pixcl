@@ -3,6 +3,10 @@ project(pixcl)
 
 set(CMAKE_CXX_STANDARD 20)
 
+if (APPLE)
+    add_compile_options(-gdwarf-4)
+endif ()
+
 find_package(OpenCL REQUIRED)
 
 set(STB_IMAGE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb_image/include)

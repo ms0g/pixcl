@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 
     pipeline.setImageProperties(in.width(), in.height());
 
-    pipeline.createBuffer(BufferType::INPUT, in.channels(),CL_MEM_READ_ONLY);
+    pipeline.createBuffer(BufferType::INPUT, in.channels(), CL_MEM_READ_ONLY);
     pipeline.createBuffer(BufferType::OUTPUT, out.channels(),CL_MEM_WRITE_ONLY);
     pipeline.createBuffer(BufferType::KERNEL);
 

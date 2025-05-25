@@ -38,6 +38,7 @@ void CLPipeline::execute() {
     // Set the work item size
     size_t maxGroupSize;
     clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &maxGroupSize, nullptr);
+
     const auto side = static_cast<size_t>(sqrt(maxGroupSize));
     const size_t localWorkSize[2] = {side, side};
 
@@ -51,13 +52,15 @@ void CLPipeline::execute() {
                                  &kernelEvent);
 }
 
-void CLPipeline::createBuffer(const BufferType type, const cl_mem_flags flags) {
+void CLPipeline::createBuffer(const BufferType type, const int channels, const cl_mem_flags flags) {
     switch (type) {
         case BufferType::INPUT:
-            inputBuffer = clCreateBuffer(context, flags, size * sizeof(cl_uchar), nullptr, nullptr);
+            inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
+                                         nullptr);
             break;
         case BufferType::OUTPUT:
-            outputBuffer = clCreateBuffer(context, flags, size * sizeof(cl_uchar), nullptr, nullptr);
+            outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
+                                          nullptr);
             break;
         case BufferType::KERNEL:
             kernelBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(gaussianKernel),
@@ -66,15 +69,15 @@ void CLPipeline::createBuffer(const BufferType type, const cl_mem_flags flags) {
     }
 }
 
-void CLPipeline::writeBuffer(const void* data, const size_t offset) {
+void CLPipeline::writeBuffer(const void* data, const int channels, const size_t offset) {
     // Transfer data to GPU
-    clEnqueueWriteBuffer(queue, inputBuffer, CL_FALSE, offset, size * sizeof(cl_uchar), data, 0, nullptr,
-                         &writeEvent);
+    clEnqueueWriteBuffer(queue, inputBuffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data, 0,
+                         nullptr, &writeEvent);
 }
 
-void CLPipeline::readBuffer(void* data, const size_t offset) {
-    err = clEnqueueReadBuffer(queue, outputBuffer,CL_FALSE, offset, size * sizeof(cl_uchar), data, 1, &kernelEvent,
-                              &readEvent);
+void CLPipeline::readBuffer(void* data, const int channels, const size_t offset) {
+    err = clEnqueueReadBuffer(queue, outputBuffer,CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
+                              1, &kernelEvent, &readEvent);
 
     // Wait for the reading buffer to finish
     clWaitForEvents(1, &readEvent);
@@ -106,12 +109,9 @@ void CLPipeline::createKernel(const char* kernelName) {
     kernel = clCreateKernel(program, kernelName, &err);
 }
 
-void CLPipeline::setImageProperties(const int width, const int height, const int channels) {
+void CLPipeline::setImageProperties(const int width, const int height) {
     this->width = width;
     this->height = height;
-    this->channels = channels;
-
-    size = width * height * channels;
 }
 
 void CLPipeline::printProfilingInfo() const {

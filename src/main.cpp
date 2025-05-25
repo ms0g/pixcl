@@ -3,8 +3,8 @@
 #include "clPipeline.h"
 #include "image.h"
 
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 0
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 1
 #define VERSION_PATCH 0
 
 #define STRINGIFY0(s) # s
@@ -73,31 +73,35 @@ static Args parseArgs(int argc, char** argv) {
     return args;
 }
 
-
 int main(int argc, char** argv) {
     // Parse Arguments
     const Args args = parseArgs(argc, argv);
 
+    Image in{}, out{};
     CLPipeline pipeline;
-    Image inImage{}, outImage{};
 
-    inImage.load(args.image);
+    in.load(args.image);
 
     const ImageFormat format = img::getFormat(args.format);
 
-    pipeline.setImageProperties(inImage.width(), inImage.height(), inImage.channels());
+    if (std::strcmp(args.effect, "gb") == 0) {
+        out.create(in.width(), in.height(), in.channels(), format);
+    } else if (std::strcmp(args.effect, "gs") == 0) {
+        out.create(in.width(), in.height(), 1, format);
+    }
 
-    pipeline.createBuffer(BufferType::INPUT, CL_MEM_READ_ONLY);
-    pipeline.createBuffer(BufferType::OUTPUT, CL_MEM_WRITE_ONLY);
+    pipeline.setImageProperties(in.width(), in.height());
+
+    pipeline.createBuffer(BufferType::INPUT, in.channels(),CL_MEM_READ_ONLY);
+    pipeline.createBuffer(BufferType::OUTPUT, out.channels(),CL_MEM_WRITE_ONLY);
     pipeline.createBuffer(BufferType::KERNEL);
 
-    pipeline.writeBuffer(inImage.raw());
+    pipeline.writeBuffer(in.raw(), in.channels());
 
-    const int width = inImage.width();
-    const int height = inImage.height();
+    const int width = in.width();
+    const int height = in.height();
 
     if (std::strcmp(args.effect, "gb") == 0) {
-        outImage.create(inImage.width(), inImage.height(), inImage.channels(), format);
         constexpr int kernelRadius = 2;
         const cl_mem kernelBuffer = pipeline.getBuffer(BufferType::KERNEL);
         // Create Program
@@ -106,7 +110,6 @@ int main(int argc, char** argv) {
         pipeline.createKernel("gaussian_blur");
         pipeline.setKernelArgs(width, height, kernelBuffer, kernelRadius);
     } else if (std::strcmp(args.effect, "gs") == 0) {
-        outImage.create(inImage.width(), inImage.height(), 1, format);
         // Create Program
         pipeline.createProgram("grayscale");
         // Create Kernel
@@ -116,9 +119,9 @@ int main(int argc, char** argv) {
 
     pipeline.execute();
 
-    pipeline.readBuffer(outImage.raw());
+    pipeline.readBuffer(out.raw(), out.channels());
 
-    outImage.write(args.outfile);
+    out.write(args.outfile);
 
     if constexpr (PROFILE)
         pipeline.printProfilingInfo();

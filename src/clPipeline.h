@@ -24,11 +24,11 @@ public:
         return type == BufferType::INPUT ? inputBuffer : type == BufferType::OUTPUT ? outputBuffer : kernelBuffer;
     }
 
-    void createBuffer(BufferType type, cl_mem_flags flags = 0);
+    void createBuffer(BufferType type, int channels = 0, cl_mem_flags flags = 0);
 
-    void writeBuffer(const void* data, size_t offset = 0);
+    void writeBuffer(const void* data, int channels, size_t offset = 0);
 
-    void readBuffer(void* data, size_t offset = 0);
+    void readBuffer(void* data, int channels, size_t offset = 0);
 
     void createProgram(const char* kernelName);
 
@@ -37,7 +37,7 @@ public:
     template<typename... Args>
     void setKernelArgs(Args&... args);
 
-    void setImageProperties(int width, int height, int channels);
+    void setImageProperties(int width, int height);
 
     void printProfilingInfo() const;
 
@@ -46,8 +46,6 @@ private:
     // Image Properties
     int width{};
     int height{};
-    int channels{};
-    size_t size{};
     // OpenCL Objects
     cl_device_id device{nullptr};
     cl_platform_id platform{nullptr};

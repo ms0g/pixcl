@@ -28,7 +28,7 @@ static Args parseArgs(int argc, char** argv) {
             "OVERVIEW: A fast, cross-platform command-line tool for real-time image processing using OpenCL acceleration.\n\n"
             "USAGE: pixcl [options] <image file>\n\n"
             "OPTIONS:\n"
-            "  -e, --effect          Effect to be applied[gb/gs]\n"
+            "  -e, --effect          Effect to be applied[gb/gs/sep]\n"
             "  -f, --format          File format[jpg <quality 0-100>?/png/bmp/tga/raw]\n"
             "  -o, --outfile         Output file name\n"
             "  -h, --help            Display available options\n"
@@ -77,15 +77,16 @@ int main(int argc, char** argv) {
     // Parse Arguments
     const Args args = parseArgs(argc, argv);
 
-    Image in{}, out{};
     CLPipeline pipeline;
+    Image in{}, out{};
 
     in.load(args.image);
 
     const ImageFormat format = img::getFormat(args.format);
-    if (std::strcmp(args.effect, "gb") == 0) {
+
+    if (!std::strcmp(args.effect, "gb") || !std::strcmp(args.effect, "sep")) {
         out.create(in.width(), in.height(), in.channels(), format);
-    } else if (std::strcmp(args.effect, "gs") == 0) {
+    } else if (!std::strcmp(args.effect, "gs")) {
         out.create(in.width(), in.height(), 1, format);
     }
 
@@ -100,7 +101,7 @@ int main(int argc, char** argv) {
     const int width = in.width();
     const int height = in.height();
 
-    if (std::strcmp(args.effect, "gb") == 0) {
+    if (!std::strcmp(args.effect, "gb")) {
         constexpr int kernelRadius = 2;
         const cl_mem kernelBuffer = pipeline.getBuffer(BufferType::KERNEL);
         // Create Program
@@ -108,11 +109,17 @@ int main(int argc, char** argv) {
         // Create Kernel
         pipeline.createKernel("gaussian_blur");
         pipeline.setKernelArgs(width, height, kernelBuffer, kernelRadius);
-    } else if (std::strcmp(args.effect, "gs") == 0) {
+    } else if (!std::strcmp(args.effect, "gs")) {
         // Create Program
         pipeline.createProgram("grayscale");
         // Create Kernel
         pipeline.createKernel("grayscale");
+        pipeline.setKernelArgs(width, height);
+    } else if (!std::strcmp(args.effect, "sep")) {
+        // Create Program
+        pipeline.createProgram("sepia_filter");
+        // Create Kernel
+        pipeline.createKernel("sepia_filter");
         pipeline.setKernelArgs(width, height);
     }
 

@@ -47,16 +47,21 @@ private:
     int width{};
     int height{};
     // OpenCL Objects
+    cl_int err{0};
     cl_device_id device{nullptr};
     cl_platform_id platform{nullptr};
     cl_context context{nullptr};
     cl_command_queue queue{nullptr};
     cl_program program{nullptr};
     cl_kernel kernel{nullptr};
-    cl_event readEvent{nullptr}, writeEvent{nullptr}, kernelEvent{nullptr};
-    cl_uint platformCount{0}, deviceCount{0};
-    cl_int err{0};
-    cl_mem inputBuffer{nullptr}, outputBuffer{nullptr}, kernelBuffer{nullptr};
+    cl_event readEvent{nullptr};
+    cl_event writeEvent{nullptr};
+    cl_event kernelEvent{nullptr};
+    cl_uint platformCount{0};
+    cl_uint deviceCount{0};
+    cl_mem inputBuffer{nullptr};
+    cl_mem outputBuffer{nullptr};
+    cl_mem kernelBuffer{nullptr};
 
     static constexpr float gaussianKernel[25] = {
         0.003765, 0.015019, 0.023792, 0.015019, 0.003765,
@@ -74,7 +79,7 @@ void CLPipeline::setKernelArgs(Args&... args) {
 
     cl_uint index = 2;
     auto applyArg = [&](const auto& arg) {
-        err = clSetKernelArg(kernel, index++, sizeof(arg), &arg);
+        clSetKernelArg(kernel, index++, sizeof(arg), &arg);
     };
 
     (applyArg(args), ...);

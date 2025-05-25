@@ -7,14 +7,18 @@
 CLPipeline::CLPipeline() {
     // Get Platform and Device Info
     err = clGetPlatformIDs(1, &platform, &platformCount);
+    if (err != CL_SUCCESS) {
+        throw std::runtime_error("Failed to get platform IDs.");
+    }
     err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, &deviceCount);
-
+    if (err != CL_SUCCESS) {
+        throw std::runtime_error("Failed to get device IDs.");
+    }
     // Create OpenCL context
     context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &err);
     if (err != CL_SUCCESS) {
         throw std::runtime_error("Failed to create a context.");
     }
-
     // Create Command Queue
     queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
     if (err != CL_SUCCESS) {
@@ -26,12 +30,12 @@ CLPipeline::~CLPipeline() {
     clReleaseEvent(readEvent);
     clReleaseEvent(writeEvent);
     clReleaseEvent(kernelEvent);
-    err = clReleaseKernel(kernel);
-    err = clReleaseProgram(program);
-    err = clReleaseMemObject(inputBuffer);
-    err = clReleaseMemObject(outputBuffer);
-    err = clReleaseCommandQueue(queue);
-    err = clReleaseContext(context);
+    clReleaseKernel(kernel);
+    clReleaseProgram(program);
+    clReleaseMemObject(inputBuffer);
+    clReleaseMemObject(outputBuffer);
+    clReleaseCommandQueue(queue);
+    clReleaseContext(context);
 }
 
 void CLPipeline::execute() {
@@ -46,39 +50,50 @@ void CLPipeline::execute() {
         (width + localWorkSize[0] - 1) / localWorkSize[0] * localWorkSize[0],
         (height + localWorkSize[1] - 1) / localWorkSize[1] * localWorkSize[1]
     };
-
     // Execute Kernel
     err = clEnqueueNDRangeKernel(queue, kernel, 2, nullptr, globalWorkSize, localWorkSize, 1, &writeEvent,
-                                 &kernelEvent);
+                           &kernelEvent);
+    if (err != CL_SUCCESS) {
+        throw std::runtime_error("Failed to execute a kernel.");
+    }
 }
 
 void CLPipeline::createBuffer(const BufferType type, const int channels, const cl_mem_flags flags) {
     switch (type) {
         case BufferType::INPUT:
             inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
-                                         nullptr);
+                                         &err);
             break;
         case BufferType::OUTPUT:
             outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
-                                          nullptr);
+                                          &err);
             break;
         case BufferType::KERNEL:
             kernelBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(gaussianKernel),
-                                          (void*) gaussianKernel, nullptr);
+                                          (void*) gaussianKernel, &err);
             break;
+    }
+
+    if (err != CL_SUCCESS) {
+        throw std::runtime_error("Failed to create a buffer.");
     }
 }
 
 void CLPipeline::writeBuffer(const void* data, const int channels, const size_t offset) {
     // Transfer data to GPU
-    clEnqueueWriteBuffer(queue, inputBuffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data, 0,
-                         nullptr, &writeEvent);
+    err = clEnqueueWriteBuffer(queue, inputBuffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
+                               0, nullptr, &writeEvent);
+    if (err != CL_SUCCESS) {
+        throw std::runtime_error("Failed to write data to the buffer.");
+    }
 }
 
 void CLPipeline::readBuffer(void* data, const int channels, const size_t offset) {
     err = clEnqueueReadBuffer(queue, outputBuffer,CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
-                              1, &kernelEvent, &readEvent);
-
+                        1, &kernelEvent, &readEvent);
+    if (err != CL_SUCCESS) {
+        throw std::runtime_error("Failed to read data from the buffer.");
+    }
     // Wait for the reading buffer to finish
     clWaitForEvents(1, &readEvent);
 }
@@ -91,7 +106,7 @@ void CLPipeline::createProgram(const char* kernelName) {
     program = clCreateProgramWithSource(context, 1, &source_str, &source_size, &err);
 
     err = clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         // Determine the size of the log
         size_t log_size;
         clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &log_size);
@@ -107,6 +122,9 @@ void CLPipeline::createProgram(const char* kernelName) {
 
 void CLPipeline::createKernel(const char* kernelName) {
     kernel = clCreateKernel(program, kernelName, &err);
+    if (err != CL_SUCCESS) {
+        throw std::runtime_error("Failed to create a kernel.");
+    }
 }
 
 void CLPipeline::setImageProperties(const int width, const int height) {

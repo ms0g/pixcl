@@ -83,7 +83,6 @@ int main(int argc, char** argv) {
     in.load(args.image);
 
     const ImageFormat format = img::getFormat(args.format);
-
     if (std::strcmp(args.effect, "gb") == 0) {
         out.create(in.width(), in.height(), in.channels(), format);
     } else if (std::strcmp(args.effect, "gs") == 0) {

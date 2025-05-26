@@ -31,7 +31,7 @@ public:
     void createKernel(const char* kernelName);
 
     template<typename... Args>
-    void setKernelArgs(Args&... args);
+    void setKernelArgs(Args&&... args);
 
     void setImageProperties(const int width, const int height) {
         this->width = width;
@@ -72,16 +72,17 @@ private:
 };
 
 template<typename... Args>
-void CLPipeline::setKernelArgs(Args&... args) {
+void CLPipeline::setKernelArgs(Args&&... args) {
     clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputBuffer);
     clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputBuffer);
 
     cl_uint index = 2;
-    auto applyArg = [&](const auto& arg) {
-        clSetKernelArg(kernel, index++, sizeof(arg), &arg);
+    auto applyArg = [&](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        clSetKernelArg(kernel, index++, sizeof(T), &arg);
     };
 
-    (applyArg(args), ...);
+    (applyArg(std::forward<Args>(args)), ...);
 }
 
 #endif //CLPIPELINE_H

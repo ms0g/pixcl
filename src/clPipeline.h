@@ -20,11 +20,7 @@ public:
 
     void execute();
 
-    cl_mem getBuffer(const BufferType type) const {
-        return type == BufferType::INPUT ? inputBuffer : type == BufferType::OUTPUT ? outputBuffer : kernelBuffer;
-    }
-
-    void createBuffer(BufferType type, int channels = 0, cl_mem_flags flags = 0);
+    cl_mem createBuffer(BufferType type, int channels = 0, cl_mem_flags flags = 0);
 
     void writeBuffer(const void* data, int channels, size_t offset = 0);
 
@@ -37,7 +33,10 @@ public:
     template<typename... Args>
     void setKernelArgs(Args&... args);
 
-    void setImageProperties(int width, int height);
+    void setImageProperties(const int width, const int height) {
+        this->width = width;
+        this->height = height;
+    }
 
     void printProfilingInfo() const;
 

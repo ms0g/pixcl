@@ -95,7 +95,6 @@ int main(int argc, char** argv) {
 
     pipeline.createBuffer(BufferType::INPUT, in.channels(), CL_MEM_READ_ONLY);
     pipeline.createBuffer(BufferType::OUTPUT, out.channels(), CL_MEM_WRITE_ONLY);
-    pipeline.createBuffer(BufferType::KERNEL);
 
     pipeline.writeBuffer(in.raw(), in.channels());
 
@@ -104,7 +103,7 @@ int main(int argc, char** argv) {
 
     if (!std::strcmp(args.effect, "gb")) {
         constexpr int kernelRadius = 2;
-        const cl_mem kernelBuffer = pipeline.getBuffer(BufferType::KERNEL);
+        const cl_mem kernelBuffer = pipeline.createBuffer(BufferType::KERNEL);
         // Create Program
         pipeline.createProgram("gaussian_blur");
         // Create Kernel

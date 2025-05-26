@@ -58,25 +58,23 @@ void CLPipeline::execute() {
     }
 }
 
-void CLPipeline::createBuffer(const BufferType type, const int channels, const cl_mem_flags flags) {
+cl_mem CLPipeline::createBuffer(const BufferType type, const int channels, const cl_mem_flags flags) {
     switch (type) {
         case BufferType::INPUT:
             inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
                                          &err);
-            break;
+            return inputBuffer;
         case BufferType::OUTPUT:
             outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
                                           &err);
-            break;
+            return outputBuffer;
         case BufferType::KERNEL:
             kernelBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(gaussianKernel),
                                           (void*) gaussianKernel, &err);
-            break;
+            return kernelBuffer;
     }
 
-    if (err != CL_SUCCESS) {
-        throw std::runtime_error("Failed to create a buffer.");
-    }
+    return nullptr;
 }
 
 void CLPipeline::writeBuffer(const void* data, const int channels, const size_t offset) {
@@ -125,11 +123,6 @@ void CLPipeline::createKernel(const char* kernelName) {
     if (err != CL_SUCCESS) {
         throw std::runtime_error("Failed to create a kernel.");
     }
-}
-
-void CLPipeline::setImageProperties(const int width, const int height) {
-    this->width = width;
-    this->height = height;
 }
 
 void CLPipeline::printProfilingInfo() const {

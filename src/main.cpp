@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
 
     if (!std::strcmp(args.effect, "gb")) {
         constexpr int kernelRadius = 2;
-        const cl_mem kernelBuffer = pipeline.createBuffer(BufferType::KERNEL);
+        cl_mem kernelBuffer = pipeline.createBuffer(BufferType::KERNEL);
         // Create Program
         pipeline.createProgram("gaussian_blur");
         // Create Kernel

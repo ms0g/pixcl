@@ -78,9 +78,7 @@ int main(int argc, char** argv) {
 
     if (args.image == nullptr) return 1;
 
-    CLPipeline pipeline;
     Image in{}, out{};
-
     in.load(args.image);
 
     const ImageFormat format = img::getFormat(args.format);
@@ -91,6 +89,7 @@ int main(int argc, char** argv) {
         out.create(in.width(), in.height(), 1, format);
     }
 
+    CLPipeline pipeline;
     pipeline.setImageProperties(in.width(), in.height());
 
     pipeline.createBuffer(BufferType::INPUT, in.channels(), CL_MEM_READ_ONLY);

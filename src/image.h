@@ -12,15 +12,13 @@ enum class AllocationType {
     CUSTOM_ALLOCATED
 };
 
-namespace img {
-ImageFormat getFormat(const char* name);
-}
-
 class Image {
 public:
     Image() = default;
 
     ~Image();
+
+    static ImageFormat getFormat(const char* name);
 
     [[nodiscard]] int width() const { return mWidth; }
 

@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
     Image in{}, out{};
     in.load(args.image);
 
-    const ImageFormat format = img::getFormat(args.format);
+    const ImageFormat format = Image::getFormat(args.format);
 
     if (!std::strcmp(args.effect, "gb") || !std::strcmp(args.effect, "sep")) {
         out.create(in.width(), in.height(), in.channels(), format);
@@ -92,10 +92,10 @@ int main(int argc, char** argv) {
     CLPipeline pipeline;
     pipeline.setImageProperties(in.width(), in.height());
 
-    pipeline.createBuffer(BufferType::INPUT, in.channels(), CL_MEM_READ_ONLY);
+    cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.channels(), CL_MEM_READ_ONLY);
     pipeline.createBuffer(BufferType::OUTPUT, out.channels(), CL_MEM_WRITE_ONLY);
 
-    pipeline.writeBuffer(in.raw(), in.channels());
+    pipeline.writeBuffer(inputBuffer, in.raw(), in.channels());
 
     const int width = in.width();
     const int height = in.height();

@@ -31,11 +31,12 @@ CLPipeline::~CLPipeline() {
     clReleaseProgram(program);
     clReleaseMemObject(inputBuffer);
     clReleaseMemObject(outputBuffer);
+    clReleaseMemObject(kernelBuffer);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
 }
 
-void CLPipeline::execute() {
+void CLPipeline::execute(const int width, const int height) {
     // Set the work item size
     size_t maxGroupSize;
     clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &maxGroupSize, nullptr);
@@ -53,15 +54,14 @@ void CLPipeline::execute() {
     checkError(err, "Failed to execute the kernel");
 }
 
-cl_mem CLPipeline::createBuffer(const BufferType type, const int channels, const cl_mem_flags flags) {
+cl_mem CLPipeline::createBuffer(const BufferType type, const int width, const int height, const int channels,
+                                const cl_mem_flags flags) {
     switch (type) {
         case BufferType::INPUT:
-            inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
-                                         &err);
+            inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr, &err);
             return inputBuffer;
         case BufferType::OUTPUT:
-            outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr,
-                                          &err);
+            outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr, &err);
             return outputBuffer;
         case BufferType::KERNEL:
             kernelBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(gaussianKernel),
@@ -72,15 +72,17 @@ cl_mem CLPipeline::createBuffer(const BufferType type, const int channels, const
     return nullptr;
 }
 
-void CLPipeline::writeBuffer(cl_mem buffer, const void* data, const int channels, const size_t offset) {
+void CLPipeline::writeBuffer(cl_mem buffer, const void* data, const int width, const int height, const int channels,
+                             const size_t offset) {
     // Transfer data to GPU
     err = clEnqueueWriteBuffer(queue, buffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
                                0, nullptr, &writeEvent);
     checkError(err, "Failed to write data to the buffer");
 }
 
-void CLPipeline::readBuffer(void* data, const int channels, const size_t offset) {
-    err = clEnqueueReadBuffer(queue, outputBuffer,CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
+void CLPipeline::readBuffer(cl_mem buffer, void* data, const int width, const int height, const int channels,
+                            const size_t offset) {
+    err = clEnqueueReadBuffer(queue, buffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
                               1, &kernelEvent, &readEvent);
     checkError(err, "Failed to read data from the buffer");
     // Wait for the reading buffer to finish

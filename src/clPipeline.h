@@ -18,13 +18,13 @@ public:
 
     ~CLPipeline();
 
-    void execute();
+    void execute(int width, int height);
 
-    cl_mem createBuffer(BufferType type, int channels = 0, cl_mem_flags flags = 0);
+    cl_mem createBuffer(BufferType type, int width = 0, int height = 0, int channels = 0, cl_mem_flags flags = 0);
 
-    void writeBuffer(cl_mem buffer, const void* data, int channels, size_t offset = 0);
+    void writeBuffer(cl_mem buffer, const void* data, int width, int height, int channels, size_t offset = 0);
 
-    void readBuffer(void* data, int channels, size_t offset = 0);
+    void readBuffer(cl_mem buffer, void* data, int width, int height, int channels, size_t offset = 0);
 
     void createProgram(const char* kernelName);
 
@@ -33,11 +33,6 @@ public:
     template<typename... Args>
     void setKernelArgs(Args&&... args);
 
-    void setImageProperties(const int width, const int height) {
-        this->width = width;
-        this->height = height;
-    }
-
     void printProfilingInfo() const;
 
 private:
@@ -45,9 +40,6 @@ private:
 
     void checkError(cl_int err, const char* msg) const;
 
-    // Image Properties
-    int width{};
-    int height{};
     // OpenCL Objects
     cl_int err{0};
     cl_device_id device{nullptr};

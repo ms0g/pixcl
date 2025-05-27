@@ -90,15 +90,10 @@ int main(int argc, char** argv) {
     }
 
     CLPipeline pipeline;
-    pipeline.setImageProperties(in.width(), in.height());
+    cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.width(), in.height(), in.channels(), CL_MEM_READ_ONLY);
+    cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.width(), out.height(), out.channels(), CL_MEM_WRITE_ONLY);
 
-    cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.channels(), CL_MEM_READ_ONLY);
-    cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.channels(), CL_MEM_WRITE_ONLY);
-
-    pipeline.writeBuffer(inputBuffer, in.raw(), in.channels());
-
-    const int width = in.width();
-    const int height = in.height();
+    pipeline.writeBuffer(inputBuffer, in.raw(), in.width(), in.height(), in.channels());
 
     if (!std::strcmp(args.effect, "gb")) {
         constexpr int kernelRadius = 2;
@@ -107,24 +102,24 @@ int main(int argc, char** argv) {
         pipeline.createProgram("gaussian_blur");
         // Create Kernel
         pipeline.createKernel("gaussian_blur");
-        pipeline.setKernelArgs(inputBuffer, outputBuffer, width, height, kernelBuffer, kernelRadius);
+        pipeline.setKernelArgs(inputBuffer, outputBuffer, in.width(), in.height(), kernelBuffer, kernelRadius);
     } else if (!std::strcmp(args.effect, "gs")) {
         // Create Program
         pipeline.createProgram("grayscale");
         // Create Kernel
         pipeline.createKernel("grayscale");
-        pipeline.setKernelArgs(inputBuffer, outputBuffer, width, height);
+        pipeline.setKernelArgs(inputBuffer, outputBuffer, in.width(), in.height());
     } else if (!std::strcmp(args.effect, "sep")) {
         // Create Program
         pipeline.createProgram("sepia_filter");
         // Create Kernel
         pipeline.createKernel("sepia_filter");
-        pipeline.setKernelArgs(inputBuffer, outputBuffer, width, height);
+        pipeline.setKernelArgs(inputBuffer, outputBuffer, in.width(), in.height());
     }
 
-    pipeline.execute();
+    pipeline.execute(in.width(), in.height());
 
-    pipeline.readBuffer(out.raw(), out.channels());
+    pipeline.readBuffer(outputBuffer, out.raw(), out.width(), out.height(), out.channels());
 
     out.write(args.outfile);
 

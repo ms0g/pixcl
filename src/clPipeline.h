@@ -73,8 +73,7 @@ private:
 
 template<typename... Args>
 void CLPipeline::setKernelArgs(Args&&... args) {
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputBuffer);
-    clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputBuffer);
+    cl_uint index = 0;
 
     cl_uint index = 2;
     auto applyArg = [&](auto&& arg) {

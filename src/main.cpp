@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     pipeline.setImageProperties(in.width(), in.height());
 
     cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.channels(), CL_MEM_READ_ONLY);
-    pipeline.createBuffer(BufferType::OUTPUT, out.channels(), CL_MEM_WRITE_ONLY);
+    cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.channels(), CL_MEM_WRITE_ONLY);
 
     pipeline.writeBuffer(inputBuffer, in.raw(), in.channels());
 
@@ -107,19 +107,19 @@ int main(int argc, char** argv) {
         pipeline.createProgram("gaussian_blur");
         // Create Kernel
         pipeline.createKernel("gaussian_blur");
-        pipeline.setKernelArgs(width, height, kernelBuffer, kernelRadius);
+        pipeline.setKernelArgs(inputBuffer, outputBuffer, width, height, kernelBuffer, kernelRadius);
     } else if (!std::strcmp(args.effect, "gs")) {
         // Create Program
         pipeline.createProgram("grayscale");
         // Create Kernel
         pipeline.createKernel("grayscale");
-        pipeline.setKernelArgs(width, height);
+        pipeline.setKernelArgs(inputBuffer, outputBuffer, width, height);
     } else if (!std::strcmp(args.effect, "sep")) {
         // Create Program
         pipeline.createProgram("sepia_filter");
         // Create Kernel
         pipeline.createKernel("sepia_filter");
-        pipeline.setKernelArgs(width, height);
+        pipeline.setKernelArgs(inputBuffer, outputBuffer, width, height);
     }
 
     pipeline.execute();

@@ -22,7 +22,7 @@ public:
 
     cl_mem createBuffer(BufferType type, int channels = 0, cl_mem_flags flags = 0);
 
-    void writeBuffer(const void* data, int channels, size_t offset = 0);
+    void writeBuffer(cl_mem buffer, const void* data, int channels, size_t offset = 0);
 
     void readBuffer(void* data, int channels, size_t offset = 0);
 

@@ -52,7 +52,7 @@ void CLPipeline::execute() {
     };
     // Execute Kernel
     err = clEnqueueNDRangeKernel(queue, kernel, 2, nullptr, globalWorkSize, localWorkSize, 1, &writeEvent,
-                           &kernelEvent);
+                                 &kernelEvent);
     if (err != CL_SUCCESS) {
         throw std::runtime_error("Failed to execute a kernel.");
     }
@@ -77,9 +77,9 @@ cl_mem CLPipeline::createBuffer(const BufferType type, const int channels, const
     return nullptr;
 }
 
-void CLPipeline::writeBuffer(const void* data, const int channels, const size_t offset) {
+void CLPipeline::writeBuffer(cl_mem buffer, const void* data, const int channels, const size_t offset) {
     // Transfer data to GPU
-    err = clEnqueueWriteBuffer(queue, inputBuffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
+    err = clEnqueueWriteBuffer(queue, buffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
                                0, nullptr, &writeEvent);
     if (err != CL_SUCCESS) {
         throw std::runtime_error("Failed to write data to the buffer.");
@@ -88,7 +88,7 @@ void CLPipeline::writeBuffer(const void* data, const int channels, const size_t 
 
 void CLPipeline::readBuffer(void* data, const int channels, const size_t offset) {
     err = clEnqueueReadBuffer(queue, outputBuffer,CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
-                        1, &kernelEvent, &readEvent);
+                              1, &kernelEvent, &readEvent);
     if (err != CL_SUCCESS) {
         throw std::runtime_error("Failed to read data from the buffer.");
     }

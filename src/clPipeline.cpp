@@ -16,11 +16,11 @@ CLPipeline::CLPipeline() {
 
     // Create OpenCL context
     context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &err);
-    checkError(err, "Failed to create a context");
+    checkError(err, "Failed to create the context");
 
     // Create Command Queue
     queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
-    checkError(err, "Failed to create a command queue");
+    checkError(err, "Failed to create the command queue");
 }
 
 CLPipeline::~CLPipeline() {
@@ -111,7 +111,7 @@ void CLPipeline::createProgram(const char* kernelName) {
 
 void CLPipeline::createKernel(const char* kernelName) {
     kernel = clCreateKernel(program, kernelName, &err);
-    checkError(err, "Failed to create a kernel");
+    checkError(err, "Failed to create the kernel");
 }
 
 void CLPipeline::printProfilingInfo() const {
@@ -134,7 +134,7 @@ std::string CLPipeline::loadKernelSource(const char* filename) {
     std::ifstream file(filename);
 
     if (!file.is_open()) {
-        throw std::runtime_error("Error: Could not open kernel source file.");
+        throw std::runtime_error("Could not open kernel source file");
     }
 
     file.seekg(0, std::ios::end);

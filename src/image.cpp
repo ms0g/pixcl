@@ -37,7 +37,7 @@ void Image::load(const char* name) {
     mRaw = stbi_load(name, &mWidth, &mHeight, &mChannels, 0);
 
     if (mRaw == nullptr) {
-        throw std::runtime_error("Error: Failed to load image.");
+        throw std::runtime_error("Failed to load image");
     }
 
     mSize = mWidth * mHeight * mChannels;

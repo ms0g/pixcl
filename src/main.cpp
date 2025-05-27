@@ -37,13 +37,15 @@ static Args parseArgs(int argc, char** argv) {
     if (argc < 8) {
         if (argc == 2 && (!std::strcmp(argv[1], "-h") || !std::strcmp(argv[1], "--help"))) {
             std::cout << usage;
-        } else if (argc == 2 && (!std::strcmp(argv[1], "-v") || !std::strcmp(argv[1], "--version"))) {
-            std::cout << "version " << VERSION;
-        } else {
-            std::cout << usage;
             return args;
         }
-        return args;
+
+        if (argc == 2 && (!std::strcmp(argv[1], "-v") || !std::strcmp(argv[1], "--version"))) {
+            std::cout << "version " << VERSION;
+            return args;
+        }
+
+        throw std::runtime_error("Invalid number of arguments");
     }
 
     for (int i = 1; i < argc; ++i) {
@@ -57,7 +59,7 @@ static Args parseArgs(int argc, char** argv) {
                 std::strcmp(args.format, "bmp") != 0 &&
                 std::strcmp(args.format, "tga") != 0 &&
                 std::strcmp(args.format, "raw") != 0) {
-                throw std::runtime_error("Error: Unknown Format: " + std::string(args.format));
+                throw std::runtime_error("Unknown Format: " + std::string(args.format));
             }
 
             int tmp = i;
@@ -75,8 +77,7 @@ static Args parseArgs(int argc, char** argv) {
 int main(int argc, char** argv) {
     // Parse Arguments
     const Args args = parseArgs(argc, argv);
-
-    if (args.image == nullptr) return 1;
+    if (args.image == nullptr) return 0;
 
     Image in{}, out{};
     in.load(args.image);

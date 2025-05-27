@@ -42,6 +42,9 @@ public:
 
 private:
     std::string loadKernelSource(const char* filename);
+
+    void checkError(cl_int err, const char* msg) const;
+
     // Image Properties
     int width{};
     int height{};
@@ -75,7 +78,6 @@ template<typename... Args>
 void CLPipeline::setKernelArgs(Args&&... args) {
     cl_uint index = 0;
 
-    cl_uint index = 2;
     auto applyArg = [&](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         clSetKernelArg(kernel, index++, sizeof(T), &arg);

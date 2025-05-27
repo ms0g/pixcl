@@ -121,15 +121,15 @@ void CLPipeline::printProfilingInfo() const {
     cl_ulong start, end;
     clGetEventProfilingInfo(writeEvent, CL_PROFILING_COMMAND_START, sizeof(start), &start, nullptr);
     clGetEventProfilingInfo(writeEvent, CL_PROFILING_COMMAND_END, sizeof(end), &end, nullptr);
-    std::cout << "Data Write Time: " << (end - start) / 1000.0 << " ms" << std::endl;
+    std::cout << "Data Write Time: " << static_cast<double>(end - start) / 1000.0 << " ms" << std::endl;
 
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_START, sizeof(start), &start, nullptr);
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(end), &end, nullptr);
-    std::cout << "Kernel Execution Time: " << (end - start) / 1000.0 << " ms" << std::endl;
+    std::cout << "Kernel Execution Time: " << static_cast<double>(end - start) / 1000.0 << " ms" << std::endl;
 
     clGetEventProfilingInfo(readEvent, CL_PROFILING_COMMAND_START, sizeof(start), &start, nullptr);
     clGetEventProfilingInfo(readEvent, CL_PROFILING_COMMAND_END, sizeof(end), &end, nullptr);
-    std::cout << "Data Read Time: " << (end - start) / 1000.0 << " ms" << std::endl;
+    std::cout << "Data Read Time: " << static_cast<double>(end - start) / 1000.0 << " ms" << std::endl;
 }
 
 std::string CLPipeline::loadKernelSource(const char* filename) {

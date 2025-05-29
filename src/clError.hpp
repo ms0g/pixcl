@@ -11,7 +11,6 @@ inline const char* clErrorString(const cl_int err) {
     const char* errStr = "Unknown OpenCL error";
 
     switch (err) {
-        case CL_SUCCESS:                                  errStr = "CL_SUCCESS"; break;
         case CL_DEVICE_NOT_FOUND:                         errStr = "CL_DEVICE_NOT_FOUND"; break;
         case CL_DEVICE_NOT_AVAILABLE:                     errStr = "CL_DEVICE_NOT_AVAILABLE"; break;
         case CL_COMPILER_NOT_AVAILABLE:                   errStr = "CL_COMPILER_NOT_AVAILABLE"; break;

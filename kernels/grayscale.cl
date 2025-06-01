@@ -1,21 +1,18 @@
-__kernel void grayscale(__global const uchar* input,
+__kernel void grayscale(__global const uchar4* input,
                         __global uchar* output,
-                        int width,
-                        int height) {
-    int x = get_global_id(0);
-    int y = get_global_id(1);
+                        const int width,
+                        const int height) {
+    const int x = get_global_id(0);
+    const int y = get_global_id(1);
 
     if (x >= width || y >= height)
         return;
 
-    int idx = (y * width + x) * 3;
+    const int idx = (y * width + x);
 
-    uchar r = input[idx];
-    uchar g = input[idx + 1];
-    uchar b = input[idx + 2];
+    uchar4 rgba = input[idx];
 
-    // Use standard luminance formula
-    uchar gray = (uchar)(0.299f * r + 0.587f * g + 0.114f * b);
+    uchar gray = (uchar)dot(convert_float3(rgba.xyz), (float3)(0.299f, 0.587f, 0.114f));
 
     output[y * width + x] = gray;
 }

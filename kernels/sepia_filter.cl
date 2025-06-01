@@ -1,23 +1,27 @@
-__kernel void sepia_filter(__global const uchar* input,
+__kernel void sepia_filter(__global const uchar4* input,
                            __global uchar* output,
                            const int width,
                            const int height) {
-    int x = get_global_id(0);
-    int y = get_global_id(1);
-    int idx = (y * width + x) * 3;
+    const int x = get_global_id(0);
+    const int y = get_global_id(1);
 
-    if (x >= width || y >= height) return;
+    if (x >= width || y >= height) 
+        return;
 
-    uchar r = input[idx];
-    uchar g = input[idx + 1];
-    uchar b = input[idx + 2];
+    const int idx = (y * width + x);
 
-    float new_r = (r * 0.393f + g * 0.769f + b * 0.189f);
-    float new_g = (r * 0.349f + g * 0.686f + b * 0.168f);
-    float new_b = (r * 0.272f + g * 0.534f + b * 0.131f);
-
+    uchar4 rgba = input[idx];
+    // Apply sepia transformation
+    // The sepia transformation matrix is:
+    // | 0.393 0.769 0.189 |
+    // | 0.349 0.686 0.168 |
+    // | 0.272 0.534 0.131 |
+    float r = dot(convert_float3(rgba.xyz), (float3)(0.393f, 0.769f, 0.189f));
+    float g = dot(convert_float3(rgba.xyz), (float3)(0.349f, 0.686f, 0.168f));
+    float b = dot(convert_float3(rgba.xyz), (float3)(0.272f, 0.534f, 0.131f));
+   
     // Clamp to 255
-    output[idx] = (uchar)(fmin(new_r, 255.0f));
-    output[idx + 1] = (uchar)(fmin(new_g, 255.0f));
-    output[idx + 2] = (uchar)(fmin(new_b, 255.0f));
+    output[idx * 3] = (uchar)(fmin(r, 255.0f));
+    output[idx * 3 + 1] = (uchar)(fmin(g, 255.0f));
+    output[idx * 3 + 2] = (uchar)(fmin(b, 255.0f));
 }

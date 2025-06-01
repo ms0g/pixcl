@@ -34,7 +34,7 @@ ImageFormat Image::getFormat(const char* name) {
 }
 
 void Image::load(const char* name) {
-    mRaw = stbi_load(name, &mWidth, &mHeight, &mChannels, 0);
+    mRaw = stbi_load(name, &mWidth, &mHeight, &mChannels, 4);
 
     if (mRaw == nullptr) {
         throw std::runtime_error("Failed to load image");

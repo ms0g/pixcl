@@ -91,10 +91,10 @@ int main(int argc, char** argv) {
     }
 
     CLPipeline pipeline;
-    cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.width(), in.height(), in.channels(), CL_MEM_READ_ONLY);
-    cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.width(), out.height(), out.channels(), CL_MEM_WRITE_ONLY);
-
-    pipeline.writeBuffer(inputBuffer, in.raw(), in.width(), in.height(), in.channels());
+    cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.width(), in.height(), 1,
+                                               CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, in.raw());
+    cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.width(), out.height(), out.channels(),
+                                                CL_MEM_WRITE_ONLY);
 
     if (!std::strcmp(args.effect, "gb")) {
         constexpr int kernelRadius = 2;

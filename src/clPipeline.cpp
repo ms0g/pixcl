@@ -45,23 +45,23 @@ void CLPipeline::execute(const int width, const int height) {
     const size_t localWorkSize[2] = {side, side};
 
     const size_t globalWorkSize[2] = {
-        (width + localWorkSize[0] - 1) / localWorkSize[0] * localWorkSize[0],
-        (height + localWorkSize[1] - 1) / localWorkSize[1] * localWorkSize[1]
+        ((width + localWorkSize[0] - 1) / localWorkSize[0]) * localWorkSize[0],
+        ((height + localWorkSize[1] - 1) / localWorkSize[1]) * localWorkSize[1]
     };
     // Execute Kernel
-    err = clEnqueueNDRangeKernel(queue, kernel, 2, nullptr, globalWorkSize, localWorkSize, 1, &writeEvent,
+    err = clEnqueueNDRangeKernel(queue, kernel, 2, nullptr, globalWorkSize, localWorkSize, 0, nullptr,
                                  &kernelEvent);
     checkError(err, "Failed to execute the kernel");
 }
 
 cl_mem CLPipeline::createBuffer(const BufferType type, const int width, const int height, const int channels,
-                                const cl_mem_flags flags) {
+                                const cl_mem_flags flags, void* ptr) {
     switch (type) {
         case BufferType::INPUT:
-            inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr, &err);
+            inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar4), ptr, &err);
             return inputBuffer;
         case BufferType::OUTPUT:
-            outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), nullptr, &err);
+            outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), ptr, &err);
             return outputBuffer;
         case BufferType::KERNEL:
             kernelBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(gaussianKernel),
@@ -119,10 +119,6 @@ void CLPipeline::createKernel(const char* kernelName) {
 void CLPipeline::printProfilingInfo() const {
     // Get profiling information
     cl_ulong start, end;
-    clGetEventProfilingInfo(writeEvent, CL_PROFILING_COMMAND_START, sizeof(start), &start, nullptr);
-    clGetEventProfilingInfo(writeEvent, CL_PROFILING_COMMAND_END, sizeof(end), &end, nullptr);
-    std::cout << "Data Write Time: " << static_cast<double>(end - start) / 1000.0 << " ms" << std::endl;
-
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_START, sizeof(start), &start, nullptr);
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(end), &end, nullptr);
     std::cout << "Kernel Execution Time: " << static_cast<double>(end - start) / 1000.0 << " ms" << std::endl;

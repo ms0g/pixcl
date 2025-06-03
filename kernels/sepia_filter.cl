@@ -21,9 +21,10 @@ __kernel void sepia_filter(__global const uchar4* input,
     float b = dot(convert_float3(rgba.xyz), (float3)(0.272f, 0.534f, 0.131f));
    
     // Clamp to 255
-    output[idx] = (uchar4)(fmin(r, 255.0f),
-                           fmin(g, 255.0f),
-                           fmin(b, 255.0f),
-                           255);
+    output[idx] = (uchar4)(
+        fmin(r, 255.0f),
+        fmin(g, 255.0f),
+        fmin(b, 255.0f),
+        255);
 
 }

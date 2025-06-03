@@ -1,5 +1,5 @@
 __kernel void gaussian_blur(__global const uchar4* input, 
-                            __global uchar* output, 
+                            __global uchar4* output, 
                             const int width, 
                             const int height, 
                             __constant float* mkernel, 
@@ -10,7 +10,6 @@ __kernel void gaussian_blur(__global const uchar4* input,
     if (x >= width || y >= height) 
 		return;
 
-    const int channels = 3;
     const int kernel_size = 2 * kernel_radius + 1;
     
     float3 sum = (float3)(0.0f, 0.0f, 0.0f);
@@ -28,9 +27,10 @@ __kernel void gaussian_blur(__global const uchar4* input,
         }
     }
 
-    int out_idx = (y * width + x) * channels;
+    int out_idx = (y * width + x);
 
-    output[out_idx] = (uchar)clamp(sum.x, 0.0f, 255.0f);
-    output[out_idx + 1] = (uchar)clamp(sum.y, 0.0f, 255.0f);
-    output[out_idx + 2] = (uchar)clamp(sum.z, 0.0f, 255.0f);
+    output[out_idx] = (uchar4)(clamp(sum.x, 0.0f, 255.0f), 
+                               clamp(sum.y, 0.0f, 255.0f), 
+                               clamp(sum.z, 0.0f, 255.0f), 
+                               255);
 }

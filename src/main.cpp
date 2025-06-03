@@ -83,18 +83,12 @@ int main(int argc, char** argv) {
     in.load(args.image);
 
     const ImageFormat format = Image::getFormat(args.format);
-
-    if (!std::strcmp(args.effect, "gb") || !std::strcmp(args.effect, "sep")) {
-        out.create(in.width(), in.height(), in.channels(), format);
-    } else if (!std::strcmp(args.effect, "gs")) {
-        out.create(in.width(), in.height(), 1, format);
-    }
+    out.create(in.width(), in.height(), 4, format);
 
     CLPipeline pipeline;
-    cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.width(), in.height(), 1,
+    cl_mem inputBuffer = pipeline.createBuffer(BufferType::INPUT, in.width(), in.height(),
                                                CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, in.raw());
-    cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.width(), out.height(), out.channels(),
-                                                CL_MEM_WRITE_ONLY);
+    cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.width(), out.height(), CL_MEM_WRITE_ONLY);
 
     if (!std::strcmp(args.effect, "gb")) {
         constexpr int kernelRadius = 2;
@@ -120,7 +114,7 @@ int main(int argc, char** argv) {
 
     pipeline.execute(in.width(), in.height());
 
-    pipeline.readBuffer(outputBuffer, out.raw(), out.width(), out.height(), out.channels());
+    pipeline.readBuffer(outputBuffer, out.raw(), out.width(), out.height());
 
     out.write(args.outfile);
 

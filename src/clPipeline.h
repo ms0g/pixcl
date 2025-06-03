@@ -20,12 +20,11 @@ public:
 
     void execute(int width, int height);
 
-    cl_mem createBuffer(BufferType type, int width = 0, int height = 0, int channels = 0, cl_mem_flags flags = 0,
-                        void* ptr = nullptr);
+    cl_mem createBuffer(BufferType type, int width = 0, int height = 0, cl_mem_flags flags = 0, void* ptr = nullptr);
 
     void writeBuffer(cl_mem buffer, const void* data, int width, int height, int channels, size_t offset = 0);
 
-    void readBuffer(cl_mem buffer, void* data, int width, int height, int channels, size_t offset = 0);
+    void readBuffer(cl_mem buffer, void* data, int width, int height, size_t offset = 0);
 
     void createProgram(const char* kernelName);
 

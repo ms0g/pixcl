@@ -1,5 +1,5 @@
 __kernel void sepia_filter(__global const uchar4* input,
-                           __global uchar* output,
+                           __global uchar4* output,
                            const int width,
                            const int height) {
     const int x = get_global_id(0);
@@ -21,7 +21,9 @@ __kernel void sepia_filter(__global const uchar4* input,
     float b = dot(convert_float3(rgba.xyz), (float3)(0.272f, 0.534f, 0.131f));
    
     // Clamp to 255
-    output[idx * 3] = (uchar)(fmin(r, 255.0f));
-    output[idx * 3 + 1] = (uchar)(fmin(g, 255.0f));
-    output[idx * 3 + 2] = (uchar)(fmin(b, 255.0f));
+    output[idx] = (uchar4)(fmin(r, 255.0f),
+                           fmin(g, 255.0f),
+                           fmin(b, 255.0f),
+                           255);
+
 }

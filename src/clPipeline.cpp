@@ -54,14 +54,14 @@ void CLPipeline::execute(const int width, const int height) {
     checkError(err, "Failed to execute the kernel");
 }
 
-cl_mem CLPipeline::createBuffer(const BufferType type, const int width, const int height, const int channels,
-                                const cl_mem_flags flags, void* ptr) {
+cl_mem CLPipeline::createBuffer(const BufferType type, const int width, const int height, const cl_mem_flags flags,
+                                void* ptr) {
     switch (type) {
         case BufferType::INPUT:
-            inputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar4), ptr, &err);
+            inputBuffer = clCreateBuffer(context, flags, width * height * sizeof(cl_uchar4), ptr, &err);
             return inputBuffer;
         case BufferType::OUTPUT:
-            outputBuffer = clCreateBuffer(context, flags, width * height * channels * sizeof(cl_uchar), ptr, &err);
+            outputBuffer = clCreateBuffer(context, flags, width * height * sizeof(cl_uchar4), ptr, &err);
             return outputBuffer;
         case BufferType::KERNEL:
             kernelBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(gaussianKernel),
@@ -80,9 +80,8 @@ void CLPipeline::writeBuffer(cl_mem buffer, const void* data, const int width, c
     checkError(err, "Failed to write data to the buffer");
 }
 
-void CLPipeline::readBuffer(cl_mem buffer, void* data, const int width, const int height, const int channels,
-                            const size_t offset) {
-    err = clEnqueueReadBuffer(queue, buffer, CL_FALSE, offset, width * height * channels * sizeof(cl_uchar), data,
+void CLPipeline::readBuffer(cl_mem buffer, void* data, const int width, const int height, const size_t offset) {
+    err = clEnqueueReadBuffer(queue, buffer, CL_FALSE, offset, width * height * sizeof(cl_uchar4), data,
                               1, &kernelEvent, &readEvent);
     checkError(err, "Failed to read data from the buffer");
     // Wait for the reading buffer to finish

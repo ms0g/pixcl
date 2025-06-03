@@ -14,5 +14,5 @@ __kernel void grayscale(__global const uchar4* input,
 
     uchar gray = (uchar)dot(convert_float3(rgba.xyz), (float3)(0.299f, 0.587f, 0.114f));
 
-    output[y * width + x] = gray;
+    output[idx] = gray;
 }

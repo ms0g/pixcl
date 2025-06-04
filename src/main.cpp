@@ -91,13 +91,12 @@ int main(int argc, char** argv) {
     cl_mem outputBuffer = pipeline.createBuffer(BufferType::OUTPUT, out.width(), out.height(), CL_MEM_WRITE_ONLY);
 
     if (!std::strcmp(args.effect, "gb")) {
-        constexpr int kernelRadius = 2;
         cl_mem kernelBuffer = pipeline.createBuffer(BufferType::KERNEL);
         // Create Program
         pipeline.createProgram("gaussian_blur");
         // Create Kernel
         pipeline.createKernel("gaussian_blur");
-        pipeline.setKernelArgs(inputBuffer, outputBuffer, in.width(), in.height(), kernelBuffer, kernelRadius);
+        pipeline.setKernelArgs(inputBuffer, outputBuffer, in.width(), in.height(), kernelBuffer);
     } else if (!std::strcmp(args.effect, "gs")) {
         // Create Program
         pipeline.createProgram("grayscale");
